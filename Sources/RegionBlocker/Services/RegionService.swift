@@ -21,9 +21,7 @@ final public class RegionService {
     }
     public var allowedRegions = [CountryCode.Russia.rawValue, CountryCode.Belarus.rawValue]
     public var allowedLanguages = ["ru", "be"]
-    
-    public var blockedByCustomFlag = false
-    
+    public var isAllowByCustomFlag = true
     public var isAllowed: Bool = false
     
     private init() {}
@@ -66,6 +64,7 @@ final public class RegionService {
             print("allowedByRegion - \(allowedByRegion), allowedByLang - \(allowedByLang), allowedByLocation - \(allowedByLocation), allowedByIp \(allowedByIp)")
             var isAllowed: Bool {
                 var flags: [Bool] = []
+                flags += [self.isAllowByCustomFlag]
                 if self.checkMethods.contains(.byRegion) {
                     flags += [allowedByRegion]
                 }
