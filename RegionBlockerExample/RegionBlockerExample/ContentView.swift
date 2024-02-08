@@ -9,11 +9,31 @@ import SwiftUI
 import RegionBlocker
 
 struct ContentView: View {
+    
+    @State private var viewDidLoad = false
+    @State var isBlocked: Bool = false
+    
     var body: some View {
         VStack {
-            Text("")
+            if isBlocked {
+                Text("Content for blocked region")
+            } else {
+                Text("Content for non blocked region")
+            }
         }
         .padding()
+        .onAppear {
+            if viewDidLoad == false {
+                viewDidLoad = true
+                checkRegion()
+            }
+        }
+    }
+    
+    func checkRegion() {
+        RegionService.shared.checkRegion { isBlocked in
+            self.isBlocked = isBlocked
+        }
     }
 }
 
