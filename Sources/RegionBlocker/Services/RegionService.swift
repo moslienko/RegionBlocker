@@ -19,7 +19,7 @@ final public class RegionService {
             }
         }
     }
-    public var allowedRegions = ["RU", "BY"]
+    public var allowedRegions = [CountryCode.Russia.rawValue, CountryCode.Belarus.rawValue]
     public var allowedLanguages = ["ru", "be"]
     
     public var blockedByCustomFlag = false
