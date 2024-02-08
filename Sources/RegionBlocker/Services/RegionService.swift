@@ -43,6 +43,11 @@ final public class RegionService {
             return
         }
         
+        #warning("todo save answer")
+        self.checkRegionByIp { isAllow in
+            print("[RegionService] checkRegionByIp isAllow - \(isAllow)")
+        }
+        
         let isAllowRegAndLang = allowedRegions.contains(currentRegion) && allowedLanguages.contains(currentLanguage)
         self.blockedByRegion = !isAllowRegAndLang
         print("[RegionService] isAllowRegAndLang - \(isAllowRegAndLang)")
@@ -63,6 +68,19 @@ final public class RegionService {
                 self.blockedByLocation = !isAllowedCountry
                 print("[RegionService] isBlocked - \(self.isBlocked)")
                 completion?(self.isBlocked)
+            }
+        }
+    }
+    
+    public func checkRegionByIp(completion: @escaping ((Bool) -> Void)) {
+        RemoteService().fetchIpInfo { result in
+            switch result {
+            case .success(let infoModel):
+                print("Country code: \(infoModel.countryCode)")
+                completion(self.allowedRegions.contains(infoModel.countryCode))
+            case .failure(let error):
+                print("Error: \(error)")
+                completion(false)
             }
         }
     }
