@@ -8,7 +8,16 @@
 import Foundation
 import CoreLocation
 
-final public class RegionService {
+public protocol RegionServiceProtocol {
+    var checkMethods: [RegionBlockerMethod] { get set }
+    var allowedRegions: [String] { get set }
+    var allowedLanguages: [String] { get set }
+    var isAllowed: Bool { get set }
+    
+    func checkRegion(completion: ((Bool) -> Void)?)
+}
+
+final public class RegionService: RegionServiceProtocol {
     
     static public let shared = RegionService()
     
@@ -19,9 +28,8 @@ final public class RegionService {
             }
         }
     }
-    public var allowedRegions = [CountryCode.Russia.rawValue, CountryCode.Belarus.rawValue]
-    public var allowedLanguages = ["ru", "be"]
-    public var isAllowByCustomFlag = true
+    public var allowedRegions: [String] = []
+    public var allowedLanguages: [String] = []
     public var isAllowed: Bool = false
     
     private init() {}
@@ -64,7 +72,6 @@ final public class RegionService {
             print("allowedByRegion - \(allowedByRegion), allowedByLang - \(allowedByLang), allowedByLocation - \(allowedByLocation), allowedByIp \(allowedByIp)")
             var isAllowed: Bool {
                 var flags: [Bool] = []
-                flags += [self.isAllowByCustomFlag]
                 if self.checkMethods.contains(.byRegion) {
                     flags += [allowedByRegion]
                 }

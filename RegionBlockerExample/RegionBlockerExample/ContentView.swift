@@ -31,6 +31,8 @@ struct ContentView: View {
     }
     
     func checkRegion() {
+        RegionService.shared.allowedRegions = [CountryCode.Russia.rawValue, CountryCode.Belarus.rawValue]
+        RegionService.shared.allowedLanguages = ["ru", "be"]
         RegionService.shared.checkRegion { isAllowed in
             self.isAllowed = isAllowed
         }
