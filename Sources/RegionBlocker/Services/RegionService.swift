@@ -12,67 +12,120 @@ final public class RegionService {
     
     static public let shared = RegionService()
     
+    public var checkMethods: [RegionBlockerMethod] = RegionBlockerMethod.allCases {
+        didSet {
+            if checkMethods.isEmpty {
+                checkMethods = RegionBlockerMethod.allCases
+            }
+        }
+    }
     public var allowedRegions = ["RU", "BY"]
     public var allowedLanguages = ["ru", "be"]
     
     public var blockedByCustomFlag = false
-    public var blockedByRegion = true
-    public var blockedByLocation: Bool?
     
-    public var isBlocked: Bool {
-        print("[RegionService] blockedByCustomFlag - \(blockedByCustomFlag), blockedByLocation - \(blockedByLocation), blockedByRegion - \(blockedByRegion)")
-        if blockedByCustomFlag {
-            return true
-        }
-        if blockedByRegion {
-            return true
-        }
-        if let blockedByLocation = blockedByLocation {
-            return blockedByLocation
-        }
-        return blockedByRegion
-    }
+    public var isAllowed: Bool = false
     
     private init() {}
     
     public func checkRegion(completion: ((Bool) -> Void)?) {
-        guard let currentRegion = Locale.current.regionCode,
-              let currentLanguage = Locale.current.languageCode else {
-            blockedByRegion = true
-            completion?(isBlocked)
+        let group = DispatchGroup()
+        
+        var allowedByRegion = false
+        var allowedByLang = false
+        var allowedByLocation: Bool?
+        var allowedByIp: Bool?
+        
+        checkMethods.forEach { method in
+            group.enter()
+            switch method {
+            case .byLanguage:
+                checkIsAllowedLang { flag in
+                    allowedByLang = flag
+                    group.leave()
+                }
+            case .byRegion:
+                checkIsAllowedRegion { flag in
+                    allowedByRegion = flag
+                    group.leave()
+                }
+            case .byLocation:
+                checkIsAllowedLocation { flag in
+                    allowedByLocation = flag
+                    group.leave()
+                }
+            case .byIp:
+                checkIsAllowedRegionInIp { flag in
+                    allowedByIp = flag
+                    group.leave()
+                }
+            }
+        }
+        
+        group.notify(queue: .main) {
+            print("allowedByRegion - \(allowedByRegion), allowedByLang - \(allowedByLang), allowedByLocation - \(allowedByLocation), allowedByIp \(allowedByIp)")
+            var isAllowed: Bool {
+                var flags: [Bool] = []
+                if self.checkMethods.contains(.byRegion) {
+                    flags += [allowedByRegion]
+                }
+                if self.checkMethods.contains(.byLanguage) {
+                    flags += [allowedByLang]
+                }
+                if self.checkMethods.contains(.byLocation) {
+                    flags += [allowedByLocation ?? false]
+                }
+                if self.checkMethods.contains(.byIp) {
+                    flags += [allowedByIp ?? false]
+                }
+                print("flags - \(flags)")
+                return flags.allSatisfy({ $0 })
+            }
+            self.isAllowed = isAllowed
+            print("isAllowed - \(isAllowed)")
+            
+            completion?(isAllowed)
+        }
+    }
+}
+
+// MARK: - Module methods
+private extension RegionService {
+    
+    func checkIsAllowedRegion(completion: ((Bool) -> Void)?) {
+        guard let currentRegion = Locale.current.regionCode else {
+            completion?(false)
             return
         }
-        
-        #warning("todo save answer")
-        self.checkRegionByIp { isAllow in
-            print("[RegionService] checkRegionByIp isAllow - \(isAllow)")
+        completion?(allowedRegions.contains(currentRegion))
+    }
+    
+    func checkIsAllowedLang(completion: ((Bool) -> Void)?) {
+        guard let currentLanguage = Locale.current.languageCode else {
+            completion?(false)
+            return
         }
-        
-        let isAllowRegAndLang = allowedRegions.contains(currentRegion) && allowedLanguages.contains(currentLanguage)
-        self.blockedByRegion = !isAllowRegAndLang
-        print("[RegionService] isAllowRegAndLang - \(isAllowRegAndLang)")
+        completion?(allowedLanguages.contains(currentLanguage))
+    }
+    
+    func checkIsAllowedLocation(completion: ((Bool) -> Void)?) {
         LocationService.shared.fetchLocation { location in
-            print("[RegionService] location - \(location)")
             guard let location = location else {
-                completion?(self.isBlocked)
+                completion?(false)
                 return
             }
             GeocoderService.determineCountry(by: location) { country in
-                print("[RegionService] country - \(country)")
                 guard let country = country else {
-                    completion?(self.isBlocked)
+                    completion?(false)
                     return
                 }
                 let isAllowedCountry = self.allowedRegions.contains(country)
-                print("[RegionService] isAllowedCountry - \(isAllowedCountry)")
-                self.blockedByLocation = !isAllowedCountry
-                print("[RegionService] isBlocked - \(self.isBlocked)")
-                completion?(self.isBlocked)
+                completion?(isAllowedCountry)
             }
         }
     }
     
-    public func checkRegionByIp(completion: @escaping ((Bool) -> Void)) {
+    func checkIsAllowedRegionInIp(completion: @escaping ((Bool) -> Void)) {
         RemoteService().fetchIpInfo { result in
             switch result {
             case .success(let infoModel):

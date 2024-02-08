@@ -11,14 +11,14 @@ import RegionBlocker
 struct ContentView: View {
     
     @State private var viewDidLoad = false
-    @State var isBlocked: Bool = false
+    @State var isAllowed: Bool = false
     
     var body: some View {
         VStack {
-            if isBlocked {
-                Text("Content for blocked region")
+            if isAllowed {
+                Text("✅ Content for allowed region")
             } else {
-                Text("Content for non blocked region")
+                Text("‼️ Content for not allowed region")
             }
         }
         .padding()
@@ -31,8 +31,8 @@ struct ContentView: View {
     }
     
     func checkRegion() {
-        RegionService.shared.checkRegion { isBlocked in
-            self.isBlocked = isBlocked
+        RegionService.shared.checkRegion { isAllowed in
+            self.isAllowed = isAllowed
         }
     }
 }

@@ -7,6 +7,6 @@
 
 import Foundation
 
-public enum RegionBlockerMethod {
+public enum RegionBlockerMethod: CaseIterable {
     case byLanguage, byRegion, byLocation, byIp
 }
