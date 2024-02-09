@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,7 +11,7 @@
 		950C48A32B73B6C000FC0E4C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950C48A22B73B6C000FC0E4C /* ContentView.swift */; };
 		950C48A52B73B6C200FC0E4C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 950C48A42B73B6C200FC0E4C /* Assets.xcassets */; };
 		950C48A82B73B6C200FC0E4C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 950C48A72B73B6C200FC0E4C /* Preview Assets.xcassets */; };
-		950C48BF2B73BB8900FC0E4C /* RegionBlocker in Frameworks */ = {isa = PBXBuildFile; productRef = 950C48BE2B73BB8900FC0E4C /* RegionBlocker */; };
+		95BFB5442B7476C600A033D5 /* RegionBlocker in Frameworks */ = {isa = PBXBuildFile; productRef = 95BFB5432B7476C600A033D5 /* RegionBlocker */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +20,8 @@
 		950C48A22B73B6C000FC0E4C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		950C48A42B73B6C200FC0E4C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		950C48A72B73B6C200FC0E4C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		95BFB5412B7476B900A033D5 /* RegionBlocker */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = RegionBlocker; path = ..; sourceTree = "<group>"; };
+		95BFB5452B747B5800A033D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,7 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				950C48BF2B73BB8900FC0E4C /* RegionBlocker in Frameworks */,
+				95BFB5442B7476C600A033D5 /* RegionBlocker in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -37,8 +39,10 @@
 		950C48942B73B6C000FC0E4C = {
 			isa = PBXGroup;
 			children = (
+				95BFB5412B7476B900A033D5 /* RegionBlocker */,
 				950C489F2B73B6C000FC0E4C /* RegionBlockerExample */,
 				950C489E2B73B6C000FC0E4C /* Products */,
+				95BFB5422B7476C600A033D5 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -53,6 +57,7 @@
 		950C489F2B73B6C000FC0E4C /* RegionBlockerExample */ = {
 			isa = PBXGroup;
 			children = (
+				95BFB5452B747B5800A033D5 /* Info.plist */,
 				950C48A02B73B6C000FC0E4C /* RegionBlockerExampleApp.swift */,
 				950C48A22B73B6C000FC0E4C /* ContentView.swift */,
 				950C48A42B73B6C200FC0E4C /* Assets.xcassets */,
@@ -67,6 +72,13 @@
 				950C48A72B73B6C200FC0E4C /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		95BFB5422B7476C600A033D5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -86,7 +98,7 @@
 			);
 			name = RegionBlockerExample;
 			packageProductDependencies = (
-				950C48BE2B73BB8900FC0E4C /* RegionBlocker */,
+				95BFB5432B7476C600A033D5 /* RegionBlocker */,
 			);
 			productName = RegionBlockerExample;
 			productReference = 950C489D2B73B6C000FC0E4C /* RegionBlockerExample.app */;
@@ -117,7 +129,6 @@
 			);
 			mainGroup = 950C48942B73B6C000FC0E4C;
 			packageReferences = (
-				950C48BD2B73BB8900FC0E4C /* XCLocalSwiftPackageReference ".." */,
 			);
 			productRefGroup = 950C489E2B73B6C000FC0E4C /* Products */;
 			projectDirPath = "";
@@ -283,6 +294,8 @@
 				DEVELOPMENT_TEAM = CVFSZXK7VF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RegionBlockerExample/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "To provide features available in your region";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -313,6 +326,8 @@
 				DEVELOPMENT_TEAM = CVFSZXK7VF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RegionBlockerExample/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "To provide features available in your region";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -355,15 +370,8 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		950C48BD2B73BB8900FC0E4C /* XCLocalSwiftPackageReference ".." */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		950C48BE2B73BB8900FC0E4C /* RegionBlocker */ = {
+		95BFB5432B7476C600A033D5 /* RegionBlocker */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RegionBlocker;
 		};
