@@ -21,6 +21,8 @@ final class LocationService: NSObject {
         locationManager.delegate = self
     }
     
+    /// Get user location
+    /// - Parameter completion: coordinates
     func fetchLocation(completion: @escaping (CLLocation?) -> Void) {
         DispatchQueue.global(qos: .utility).async {
             guard CLLocationManager.locationServicesEnabled() else {

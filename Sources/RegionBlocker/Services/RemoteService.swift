@@ -11,6 +11,8 @@ class RemoteService {
     
     private let apiUrl = "http://ip-api.com/json/?fields=countryCode"
     
+    /// Get available information about a user through his IP
+    /// - Parameter completion: IP info model
     func fetchIpInfo(completion: @escaping (Result<IpInfoResponse, Error>) -> Void) {
         guard let url = URL(string: apiUrl) else {
             completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Incorrect url"])))

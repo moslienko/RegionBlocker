@@ -11,6 +11,10 @@ final class GeocoderService {
     
     private static let geocoder = CLGeocoder()
     
+    /// Get country by coordinates
+    /// - Parameters:
+    ///   - location: coordinates
+    ///   - completion: Country code
     static func determineCountry(by location: CLLocation, completion: @escaping (String?) -> Void) {
         GeocoderService.geocoder.reverseGeocodeLocation(location) { placemarks, error in
             guard error == nil,

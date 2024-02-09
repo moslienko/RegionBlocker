@@ -37,6 +37,8 @@ final public class RegionService: RegionServiceProtocol {
     
     private init() {}
     
+    /// Check the user's current region to set a availability status
+    /// - Parameter completion: actual availability status
     public func checkRegion(completion: ((Bool) -> Void)?) {
         let group = DispatchGroup()
         
@@ -75,7 +77,6 @@ final public class RegionService: RegionServiceProtocol {
                 allowedByIp: allowedByIp
             )
             self.isAllowed = isAllowed
-            print("isAllowed - \(isAllowed)")
             
             completion?(isAllowed)
         }
@@ -101,7 +102,6 @@ final public class RegionService: RegionServiceProtocol {
             allowedByIp: allowedByIp
         )
         self.isAllowed = isAllowed
-        print("isAllowed async - \(isAllowed)")
         
         return isAllowed
     }
@@ -110,9 +110,14 @@ final public class RegionService: RegionServiceProtocol {
 // MARK: - Module methods
 private extension RegionService {
     
+    /// Calculate the availability status of the region using the result of the checks
+    /// - Parameters:
+    ///   - allowedByRegion: availability of the region by region (in settings)
+    ///   - allowedByLang: availability of the region by language (in settings)
+    ///   - allowedByLocation: availability of the region by location coordinated
+    ///   - allowedByIp: availability of the region by IP country
+    /// - Returns: allowed status
     func calculateAllowFlag(allowedByRegion: Bool, allowedByLang: Bool, allowedByLocation: Bool?, allowedByIp: Bool?) -> Bool {
-        print("allowedByRegion - \(allowedByRegion), allowedByLang - \(allowedByLang), allowedByLocation - \(allowedByLocation), allowedByIp \(allowedByIp)")
-        
         var isAllowed: Bool {
             var flags: [Bool] = []
             if self.checkMethods.contains(.byRegion) {
@@ -127,7 +132,6 @@ private extension RegionService {
             if self.checkMethods.contains(.byIp) {
                 flags += [allowedByIp ?? false]
             }
-            print("flags - \(flags)")
             return flags.allSatisfy({ $0 })
         }
         
@@ -168,11 +172,9 @@ private extension RegionService {
     func checkIsAllowedRegionInIp(completion: @escaping ((Bool) -> Void)) {
         RemoteService().fetchIpInfo { result in
             switch result {
-            case .success(let infoModel):
-                print("Country code: \(infoModel.countryCode)")
+            case let .success(infoModel):
                 completion(self.allowedRegions.contains(infoModel.countryCode))
-            case .failure(let error):
-                print("Error: \(error)")
+            case .failure:
                 completion(false)
             }
         }
