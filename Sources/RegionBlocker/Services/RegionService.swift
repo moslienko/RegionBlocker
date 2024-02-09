@@ -15,6 +15,9 @@ public protocol RegionServiceProtocol {
     var isAllowed: Bool { get set }
     
     func checkRegion(completion: ((Bool) -> Void)?)
+    
+    @available(iOS 13.0, *)
+    func checkRegion(location: CLLocation?) async -> Bool
 }
 
 final public class RegionService: RegionServiceProtocol {
@@ -46,15 +49,11 @@ final public class RegionService: RegionServiceProtocol {
             group.enter()
             switch method {
             case .byLanguage:
-                checkIsAllowedLang { flag in
-                    allowedByLang = flag
-                    group.leave()
-                }
+                allowedByLang = checkIsAllowedLang()
+                group.leave()
             case .byRegion:
-                checkIsAllowedRegion { flag in
-                    allowedByRegion = flag
-                    group.leave()
-                }
+                allowedByRegion = checkIsAllowedRegion()
+                group.leave()
             case .byLocation:
                 checkIsAllowedLocation { flag in
                     allowedByLocation = flag
@@ -69,49 +68,84 @@ final public class RegionService: RegionServiceProtocol {
         }
         
         group.notify(queue: .main) {
-            print("allowedByRegion - \(allowedByRegion), allowedByLang - \(allowedByLang), allowedByLocation - \(allowedByLocation), allowedByIp \(allowedByIp)")
-            var isAllowed: Bool {
-                var flags: [Bool] = []
-                if self.checkMethods.contains(.byRegion) {
-                    flags += [allowedByRegion]
-                }
-                if self.checkMethods.contains(.byLanguage) {
-                    flags += [allowedByLang]
-                }
-                if self.checkMethods.contains(.byLocation) {
-                    flags += [allowedByLocation ?? false]
-                }
-                if self.checkMethods.contains(.byIp) {
-                    flags += [allowedByIp ?? false]
-                }
-                print("flags - \(flags)")
-                return flags.allSatisfy({ $0 })
-            }
+            let isAllowed = self.calculateAllowFlag(
+                allowedByRegion: allowedByRegion,
+                allowedByLang: allowedByLang,
+                allowedByLocation: allowedByLocation,
+                allowedByIp: allowedByIp
+            )
             self.isAllowed = isAllowed
             print("isAllowed - \(isAllowed)")
             
             completion?(isAllowed)
         }
     }
+    
+    @available(iOS 13.0, *)
+    public func checkRegion(location: CLLocation? = nil) async -> Bool {
+        let allowedByRegion = self.checkMethods.contains(.byRegion) ? self.checkIsAllowedRegion() : false
+        let allowedByLang = self.checkMethods.contains(.byLanguage) ? self.checkIsAllowedLang() : false
+        let allowedByIp = self.checkMethods.contains(.byIp) ? await self.checkIsAllowedRegionInIp() : nil
+        var allowedByLocation: Bool?
+        
+        if let location = location,
+           self.checkMethods.contains(.byLocation) {
+            allowedByLocation = await self.checkIsAllowedLocation(location)
+        }
+        
+        
+        let isAllowed = self.calculateAllowFlag(
+            allowedByRegion: allowedByRegion,
+            allowedByLang: allowedByLang,
+            allowedByLocation: allowedByLocation,
+            allowedByIp: allowedByIp
+        )
+        self.isAllowed = isAllowed
+        print("isAllowed async - \(isAllowed)")
+        
+        return isAllowed
+    }
 }
 
 // MARK: - Module methods
 private extension RegionService {
     
-    func checkIsAllowedRegion(completion: ((Bool) -> Void)?) {
-        guard let currentRegion = Locale.current.regionCode else {
-            completion?(false)
-            return
+    func calculateAllowFlag(allowedByRegion: Bool, allowedByLang: Bool, allowedByLocation: Bool?, allowedByIp: Bool?) -> Bool {
+        print("allowedByRegion - \(allowedByRegion), allowedByLang - \(allowedByLang), allowedByLocation - \(allowedByLocation), allowedByIp \(allowedByIp)")
+        
+        var isAllowed: Bool {
+            var flags: [Bool] = []
+            if self.checkMethods.contains(.byRegion) {
+                flags += [allowedByRegion]
+            }
+            if self.checkMethods.contains(.byLanguage) {
+                flags += [allowedByLang]
+            }
+            if self.checkMethods.contains(.byLocation) {
+                flags += [allowedByLocation ?? false]
+            }
+            if self.checkMethods.contains(.byIp) {
+                flags += [allowedByIp ?? false]
+            }
+            print("flags - \(flags)")
+            return flags.allSatisfy({ $0 })
         }
-        completion?(allowedRegions.contains(currentRegion))
+        
+        return isAllowed
     }
     
-    func checkIsAllowedLang(completion: ((Bool) -> Void)?) {
-        guard let currentLanguage = Locale.current.languageCode else {
-            completion?(false)
-            return
+    func checkIsAllowedRegion() -> Bool {
+        guard let currentRegion = Locale.current.regionCode else {
+            return false
         }
-        completion?(allowedLanguages.contains(currentLanguage))
+        return allowedRegions.contains(currentRegion)
+    }
+    
+    func checkIsAllowedLang() -> Bool {
+        guard let currentLanguage = Locale.current.languageCode else {
+            return false
+        }
+        return allowedLanguages.contains(currentLanguage)
     }
     
     func checkIsAllowedLocation(completion: ((Bool) -> Void)?) {
@@ -142,5 +176,27 @@ private extension RegionService {
                 completion(false)
             }
         }
+    }
+}
+
+// MARK: - Async/await wrappers
+private extension RegionService {
+    
+    @available(iOS 13.0, *)
+    func checkIsAllowedRegionInIp() async -> Bool {
+        await withCheckedContinuation { continuation in
+            checkIsAllowedRegionInIp() { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    @available(iOS 13.0, *)
+    func checkIsAllowedLocation(_ location: CLLocation) async -> Bool {
+        guard let country = await GeocoderService.determineCountry(by: location) else {
+            return false
+        }
+        let isAllowedCountry = self.allowedRegions.contains(country)
+        return isAllowedCountry
     }
 }

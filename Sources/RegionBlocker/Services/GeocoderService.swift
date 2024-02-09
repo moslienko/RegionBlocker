@@ -22,4 +22,13 @@ final class GeocoderService {
             completion(country)
         }
     }
+    
+    @available(iOS 13.0, *)
+    static func determineCountry(by location: CLLocation) async -> String? {
+        await withCheckedContinuation { continuation in
+            determineCountry(by: location) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
 }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RegionBlocker
+import CoreLocation
 
 struct ContentView: View {
     
@@ -25,7 +26,11 @@ struct ContentView: View {
         .onAppear {
             if viewDidLoad == false {
                 viewDidLoad = true
-                checkRegion()
+                //checkRegion()
+                
+                Task {
+                    await asyncCheckRegion()
+                }
             }
         }
     }
@@ -33,9 +38,19 @@ struct ContentView: View {
     func checkRegion() {
         RegionService.shared.allowedRegions = [CountryCode.Russia.rawValue, CountryCode.Belarus.rawValue]
         RegionService.shared.allowedLanguages = ["ru", "be"]
+        RegionService.shared.checkMethods = RegionBlockerMethod.allCases
+        
         RegionService.shared.checkRegion { isAllowed in
             self.isAllowed = isAllowed
         }
+    }
+    
+    func asyncCheckRegion() async {
+        RegionService.shared.allowedRegions = [CountryCode.Russia.rawValue, CountryCode.Belarus.rawValue]
+        RegionService.shared.allowedLanguages = ["ru", "be"]
+        RegionService.shared.checkMethods = [.byLocation]
+        
+        self.isAllowed = await RegionService.shared.checkRegion(location: CLLocation(latitude: 55.7558, longitude: 37.6173))
     }
 }
 
